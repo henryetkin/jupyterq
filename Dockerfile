@@ -1,10 +1,20 @@
 # ARG usage in FROMs has to go up here in global
 
-ARG embedpy_img=kxsys/embedpy:latest
+ARG embedpy_img=kxsys/embedpy:jimdigriz
 
 ####
 
 FROM $embedpy_img AS embedpy
+
+
+ENV NB_USER kx
+ENV NB_UID 1000
+ENV HOME /home/${NB_USER}
+RUN adduser --disabled-password \
+    --gecos "Default user" \
+    --uid ${NB_UID} \
+    ${NB_USER}
+
 
 # do not clean here, its cleaned later!
 # no upgrade either as it comes from embedPy
@@ -61,7 +71,6 @@ RUN find /opt/kx/jupyterq -maxdepth 1 -type f -name 'jupyterq_*.q' | xargs ln -s
 	&& ln -s -t /opt/kx/q /opt/kx/jupyterq/kxpy \
 	&& ln -s -t /opt/kx/q/l64 /opt/kx/jupyterq/l64/jupyterq.so
 
-USER kx
 
 RUN . /opt/conda/etc/profile.d/conda.sh \
 	&& conda activate kx \
@@ -75,7 +84,8 @@ RUN . /opt/conda/etc/profile.d/conda.sh \
 RUN mkdir ~/.jupyter \
 	&& echo "c.NotebookApp.token = u''" > ~/.jupyter/jupyter_notebook_config.py
 
-USER root
+#USER kx
 
 ENTRYPOINT ["/init"]
-CMD ["/bin/sh", "-l", "-c", "printf '\npoint your browser at http://127.0.0.1:%s/notebooks/kdb%%2BNotebooks.ipynb\n\n' $PORT && exec jupyter notebook --notebook-dir=/opt/kx/jupyterq --ip='0.0.0.0' --port=$PORT --no-browser"]
+CMD ["jupyter", "notebook", "--ip", "0.0.0.0"]
+#CMD ["/bin/sh", "-l", "-c", "printf '\npoint your browser at http://127.0.0.1:%s/notebooks/kdb%%2BNotebooks.ipynb\n\n' $PORT && exec jupyter notebook --notebook-dir=/opt/kx/jupyterq --ip='0.0.0.0' --port=$PORT --no-browser"]
