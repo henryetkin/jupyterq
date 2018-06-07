@@ -7,13 +7,7 @@ ARG embedpy_img=kxsys/embedpy:jimdigriz
 FROM $embedpy_img AS embedpy
 
 
-ENV NB_USER kx
-ENV NB_UID 1000
-ENV HOME /home/${NB_USER}
-RUN adduser --disabled-password \
-    --gecos "Default user" \
-    --uid ${NB_UID} \
-    ${NB_USER}
+
 
 
 # do not clean here, its cleaned later!
